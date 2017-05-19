@@ -1,68 +1,97 @@
-class SKObjects:
-    def __init__(self, x, y, character):
-        self.x = x
-        self.y = y
-        self.character = character
-    def print (self, x, y):
-        if self.x == x and self.y == y:
-            print(self.character, end="")
-            return True
-        else:
-            return False
-    def move(self, dx, dy):
-        self.x += dx
-        self.y += dy
-    def calculate_next(self, dx, dy):
-        nextx = self.x + dx
-        nexty = self.y + dy
-        return (nextx, nexty)
+import pygame
+
+pygame.init()
+
+pygame.display.set_caption("Đẩy Hộp Mãi Không Xong")
+
+screen = pygame.display.set_mode((600, 600))
+loop = True
+clock = pygame.time.Clock()
+
+mario_image = pygame.image.load("mario.png")
+square_image = pygame.image.load("square.png")
+box_image = pygame.image.load("box.png")
+gate_image = pygame.image.load("gate.png")
+col_count = 18
+row_count = 18
+
+mario_col = 0
+mario_row = 0
+mario_next_x = 0
+mario_next_y = 0
+
+square_width = square_image.get_width()
+square_height = square_image.get_height()
 
 
-class Map:
-    def __init__(self):#constructor
-        self.width = 5
-        self.height = 7
-        self.chaien = SKObjects(2, 3, " C ")
-        self.box = SKObjects (1, 4, " B ")
-        self.gate = SKObjects (2, 5, " G ")
-        self.objects = [self.chaien, self.box, self.gate]
+box_col = 3
+box_row = 2
 
-    def print_objects(self, x, y):
-        for object in self.objects:
-            if object.print(x, y):
-                return True
-        return False
+box_width = box_image.get_width()
+box_height = box_image.get_height()
 
-    def print(self):
-        for y in range (self.height):
-            for x in range (self.width):
-                if self.print_objects(x, y):
-                    pass
-                else:
-                    print(" - ", end="")
-            print()
-    def process_input(self):
-        move = input("Your Move ?").upper()
-        dx = 0
-        dy = 0
+gate_col = 15
+gate_row = 12
+gate_width = gate_image.get_width()
+gate_height = gate_image.get_height()
 
-        if move == "D":
-            dx = 1
-        elif move == "A":
-            dx = -1
-        elif move == "W":
-            dy = -1
-        elif move == "S":
-            dy = 1
-        [next_x, next_y] = self.chaien.calculate_next(dx, dy)
-        self.chaien.x = next_x
-        self.chaien.y = next_y
+right_pressed = False
+left_pressed = False
+up_pressed = False
+down_press = False
+
+def maps(next_col, next_row):
+    if next_col >= 0 and next_col < col_count and next_row >= 0 and next_row < row_count:
+        return True
+    return False
+
+while loop:
+    x_step = 0
+    y_step = 0
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            loop = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RIGHT:
+                    y_step = 1
+            elif event.key == pygame.K_LEFT:
+                    y_step = -1
+            elif event.key == pygame.K_UP:
+                    x_step = -1
+            elif event.key == pygame.K_DOWN:
+                    x_step = 1
+            else:
+                pass
+
+            mario_next_x = mario_col + x_step
+            mario_next_y = mario_row + y_step
+
+            if maps(mario_next_x, mario_next_y):
+                if (mario_next_x, mario_next_y) != (box_col, box_row):
+                    mario_row = mario_next_y
+                    mario_col = mario_next_x
+    screen.fill((233, 40, 40))
+
+    for col in range(col_count):
+        for row in range(row_count):
+            x = row * square_width - square_width / 2 + 16
+            y = col * square_height - square_height / 2 + 16
+
+            screen.blit(square_image, (x, y))
+
+    mario_x = (mario_row * square_width) - square_width / 2 + 16
+    mario_y = (mario_col * square_height) - square_height / 2 + 16
+
+    box_x = (box_row * square_width) - square_width / 2 + 50
+    box_y = (box_col * square_height) - square_height / 2 + 50
+
+    gate_x = (gate_row * square_width) - square_width / 2 + 50
+    gate_y = (gate_col * square_height) - square_height / 2 + 50
 
 
+    screen.blit(mario_image,(mario_x, mario_y))
+    screen.blit(box_image, (box_x, box_y))
+    screen.blit(gate_image, (gate_x, gate_y))
 
-
-
-sokoban = Map()
-while True:
-    sokoban.print()
-    sokoban.process_input()
+    pygame.display.flip()
+    clock.tick(60)
